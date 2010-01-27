@@ -1,3 +1,10 @@
+/**
+ * EditSections2 Plugin for DokuWiki / style.css
+ * 
+ * @author Ben Coburn <btcoburn@silicodon.net>
+ * @author Kazutaka Miyasaka <kazmiya@gmail.com>
+ */
+
 /*
 Makes the default template display much better with this plugin.
 If using other templates, you may want to make your own adjustments.
@@ -15,7 +22,17 @@ body div.dokuwiki div.secedit {
   overflow: visible;
 }
 
-body div.dokuwiki div.secedit input.button {
+body div.dokuwiki div.secedit input.button,
+body div.dokuwiki div.editbutton_plain input.button {
   margin-top: 1.25em;
 }
 
+body div.dokuwiki div.editbutton_table input.button {
+  margin-top: -2em !important;
+}
+
+body div.dokuwiki .section_highlight,
+body div.dokuwiki .section_highlight th,
+body div.dokuwiki .section_highlight td {
+  background-color: __background_alt__ !important;
+}
