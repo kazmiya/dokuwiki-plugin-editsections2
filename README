@@ -1,12 +1,14 @@
-
+=================================
 EditSections2 Plugin for DokuWiki
 =================================
 
 This is a rewritten version of Ben Coburn's "Edit Section 
 Reorganizer Plugin" for DokuWiki.
 
-    (!) THIS PLUGIN IS IN ITS BETA QUALITY.
+Download URL for the Plugin Manager
+  http://github.com/kazmiya/dokuwiki-plugin-editsections2/zipball/master
 
-(c) 2010 by Kazutaka Miyasaka <kazmiya@gmail.com>
-(c) 2006 by Ben Coburn <btcoburn@silicodon.net>
 See COPYING for license info.
+
+Copyright (c) 2010 Kazutaka Miyasaka <kazmiya@gmail.com>
+Copyright (c) 2006 Ben Coburn <btcoburn@silicodon.net>
