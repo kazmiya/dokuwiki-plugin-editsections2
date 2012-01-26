@@ -7,7 +7,7 @@
  * @author  Kazutaka Miyasaka <kazmiya@gmail.com>
  */
 
-addInitEvent(function() {
+(function() {
     /**
      * Lookup table for section edit id (startPos => secedit_id)
      */
@@ -15,12 +15,21 @@ addInitEvent(function() {
 
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-    if (typeof JSINFO !== 'object') {
-        return;
-    } else if (!JSINFO.plugin_editsections2) {
-        replaceSectionEditButtonEvents_Lemming();
-    } else {
-        replaceSectionEditButtonEvents();
+    // compatibility check
+    if (
+        typeof DEPRECATED === 'function' ||
+        typeof addInitEvent === 'undefined'
+    ) {
+        // for DokuWiki Angua or later
+        jQuery(replaceSectionEditButtonEvents);
+    } else if (typeof JSINFO === 'object') {
+        if (JSINFO.plugin_editsections2) {
+            // for DokuWiki Anteater and Rincewind
+            addInitEvent(replaceSectionEditButtonEvents_Anteater);
+        } else {
+            // for DokuWiki Lemming
+            addInitEvent(replaceSectionEditButtonEvents_Lemming);
+        }
     }
 
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -29,44 +38,14 @@ addInitEvent(function() {
      * Replaces mouseover events on section edit buttons
      */
     function replaceSectionEditButtonEvents() {
-        var i, iMax, parent, events, guid, buttonForms, sectionEditForms = [];
-
-        buttonForms = getElementsByClass('btn_secedit', document, 'form');
-
-        // extract section edit forms
-        for (i = 0, iMax = buttonForms.length; i < iMax; i++) {
-            parent = buttonForms[i].parentNode;
-
-            // parent element must be 'div.editbutton_section'
-            if (
-                parent &&
-                parent.tagName === 'DIV' &&
-                /\b(?:editbutton_section)\b/.test(parent.className)
-            ) {
-                sectionEditForms[sectionEditForms.length] = buttonForms[i];
-            }
-        }
-
-        // remove events and collect section info
-        for (i = 0, iMax = sectionEditForms.length; i < iMax; i++) {
-            events = sectionEditForms[i].events;
-
-            // remove all of the previously-set mouseover events from the button
-            if (events && events.mouseover) {
-                for (guid in events.mouseover) {
-                    removeEvent(
-                        sectionEditForms[i], 'mouseover', events.mouseover[guid]
-                    );
-                }
-            }
-
-            addEditIdLookupTable(sectionEditForms[i]);
-        }
-
-        // add new event to highlight sections to be edited
-        for (i = 0, iMax = sectionEditForms.length; i < iMax; i++) {
-            addEvent(sectionEditForms[i], 'mouseover', highlightSections);
-        }
+        jQuery('form.btn_secedit')
+            .each(function() {
+                addEditIdLookupTable(this);
+            })
+            .unbind('mouseover')
+            .bind('mouseover', function(event) {
+                highlightSections(event);
+            });
     }
 
     /**
@@ -77,9 +56,9 @@ addInitEvent(function() {
 
         if (range && (matched = /^(\d+)-(\d*)$/.exec(range.value))) {
             if (startOrEnd === 'start') {
-                return parseInt(matched[1]);
+                return Number(matched[1]);
             } else {
-                return matched[2].length ? parseInt(matched[2]) : 'last';
+                return matched[2].length ? Number(matched[2]) : 'last';
             }
         } else {
             return false;
@@ -180,6 +159,57 @@ addInitEvent(function() {
 
     /**
      * Replaces mouseover events on section edit buttons
+     * (for DokuWiki Anteater and Rincewind)
+     */
+    function replaceSectionEditButtonEvents_Anteater() {
+        var i, iMax, parent, events, guid, buttonForms, sectionEditForms = [];
+
+        buttonForms = getElementsByClass('btn_secedit', document, 'form');
+
+        // extract section edit forms
+        for (i = 0, iMax = buttonForms.length; i < iMax; i++) {
+            parent = buttonForms[i].parentNode;
+
+            // parent element must be 'div.editbutton_section'
+            if (
+                parent &&
+                parent.tagName === 'DIV' &&
+                /\b(?:editbutton_section)\b/.test(parent.className)
+            ) {
+                sectionEditForms[sectionEditForms.length] = buttonForms[i];
+            }
+        }
+
+        // remove events and collect section info
+        for (i = 0, iMax = sectionEditForms.length; i < iMax; i++) {
+            events = sectionEditForms[i].events;
+
+            // remove all of the previously-set mouseover events from the button
+            if (events && events.mouseover) {
+                for (guid in events.mouseover) {
+                    removeEvent(
+                        sectionEditForms[i], 'mouseover', events.mouseover[guid]
+                    );
+                }
+            }
+
+            addEditIdLookupTable(sectionEditForms[i]);
+        }
+
+        // add new event to highlight sections to be edited
+        for (i = 0, iMax = sectionEditForms.length; i < iMax; i++) {
+            addEvent(
+                sectionEditForms[i],
+                'mouseover',
+                highlightSections
+            );
+        }
+    }
+
+    /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+    /**
+     * Replaces mouseover events on section edit buttons
      * (for DokuWiki Lemming)
      */
     function replaceSectionEditButtonEvents_Lemming() {
@@ -258,4 +288,4 @@ addInitEvent(function() {
             }
         }
     }
-});
+})();

@@ -2,11 +2,26 @@
 EditSections2 Plugin for DokuWiki
 =================================
 
-This is a rewritten version of Ben Coburn's "Edit Section 
+This is a rewritten version of Ben Coburn's "Edit Section
 Reorganizer Plugin" for DokuWiki.
 
 Download URL for the Plugin Manager
   http://github.com/kazmiya/dokuwiki-plugin-editsections2/zipball/master
+
+The supported versions of DokuWiki are:
+  2006-11-06
+  2007-06-26
+  2008-05-05
+  2009-02-14
+  "Lemming"
+  "Anteater"
+  "Rincewind"
+  "Angua"
+
+If you have any problems, please open issues on the issue tracker.
+  https://github.com/kazmiya/dokuwiki-plugin-editsections2/issues
+
+** Please don't ask on http://www.dokuwiki.org/plugin:editsections **
 
 See COPYING for license info.
 
