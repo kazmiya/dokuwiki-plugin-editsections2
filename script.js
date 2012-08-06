@@ -94,7 +94,7 @@
      * Highlights sections in the edit range
      */
     function highlightSections(event) {
-        var sectionEditForm, endPos, stopClass, stopClassRegExp, cursor,
+        var sectionEditForm, endPos, stopClassRegExp, cursor,
             doNotHighlightHeadings;
 
         sectionEditForm = event.target.form;
@@ -105,52 +105,37 @@
 
         endPos = getRangeValue(sectionEditForm.range, 'end');
 
-        if (
-            typeof endPos === 'number' &&
-            editIdLookup[endPos + 1]
-        ) {
-            stopClass = 'sectionedit' + editIdLookup[endPos + 1];
-        } else if (endPos === 'last') {
-            stopClass = null;
-        } else {
+        if (endPos === false) {
             return;
         }
 
-        cursor = sectionEditForm.parentNode;
+        // set stopClass regexp
+        if (endPos === 'last') {
+            stopClassRegExp = /\bfootnotes\b/;
+        } else if (editIdLookup[endPos + 1]) {
+            stopClassRegExp = new RegExp(
+                '\\b(?:footnotes|sectionedit' +
+                String(editIdLookup[endPos + 1]).replace(/(\W)/g, '\\$1') +
+                ')\\b'
+            );
+        }
 
         doNotHighlightHeadings =
             JSINFO.plugin_editsections2.highlight_target === 'exclude_headings';
 
-        if (stopClass === null) {
-            // highlight rest of the page contents
-            while (cursor = cursor.nextSibling) {
-                if (cursor.className === 'footnotes') {
-                    break;
-                }
+        cursor = sectionEditForm.parentNode;
 
-                if (doNotHighlightHeadings && isHeading(cursor)) {
-                    continue;
-                }
-
+        // highlight until the stopClass appeared
+        while (cursor = cursor.nextSibling) {
+            if (stopClassRegExp.test(cursor.className)) {
+                break;
+            } else if (
+                (doNotHighlightHeadings && isHeading(cursor)) ||
+                /\beditbutton_section\b/.test(cursor.className)
+            ) {
+                continue;
+            } else {
                 cursor.className += ' section_highlight';
-            }
-        } else {
-            stopClassRegExp = new RegExp(
-                '\\b' + stopClass.replace(/(\W)/g, '\\$1') + '\\b'
-            );
-
-            // highlight until the stopClass appeared
-            while (cursor = cursor.nextSibling) {
-                if (
-                    cursor.className === 'footnotes' ||
-                    stopClassRegExp.test(cursor.className)
-                ) {
-                    break;
-                } else if (doNotHighlightHeadings && isHeading(cursor)) {
-                    continue;
-                } else {
-                    cursor.className += ' section_highlight';
-                }
             }
         }
     }
