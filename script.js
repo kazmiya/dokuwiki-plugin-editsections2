@@ -52,30 +52,37 @@
      * Returns start/end value of the section edit range
      */
     function getRangeValue(range, startOrEnd) {
-        var matched;
+        var matched,
+            ret;
 
-        if (range && (matched = /^(\d+)-(\d*)$/.exec(range.value))) {
-            if (startOrEnd === 'start') {
-                return Number(matched[1]);
-            } else {
-                return matched[2].length ? Number(matched[2]) : 'last';
-            }
+        if (!range || !(matched = /^(\d+)-(\d*)$/.exec(range.value))) {
+            ret = false;
+        } else if (startOrEnd === 'start') {
+            ret = Number(matched[1]);
+        } else if (matched[2].length) {
+            ret = Number(matched[2]);
         } else {
-            return false;
+            ret = 'last';
         }
+
+        return ret;
     }
 
     /**
      * Scans and adds section edit id lookup table
      */
     function addEditIdLookupTable(sectionEditForm) {
-        var parent, idMatched, startPos;
+        var parent,
+            idMatched,
+            startPos;
 
         parent = sectionEditForm.parentNode;
 
         if (
             parent &&
-            parent.tagName === 'DIV' &&
+            parent.tagName &&
+            parent.tagName.toLowerCase() === 'div' &&
+            parent.className &&
             (idMatched = /\b(?:editbutton_(\d+))\b/.exec(parent.className)) &&
             (startPos = getRangeValue(sectionEditForm.range, 'start'))
         ) {
@@ -87,15 +94,18 @@
      * Checks if an element is heading
      */
     function isHeading(element) {
-        return /^H[1-6]/.test(element.tagName);
+        return element.tagName && /^H[1-6]/i.test(element.tagName);
     }
 
     /**
      * Highlights sections in the edit range
      */
     function highlightSections(event) {
-        var sectionEditForm, endPos, stopClassRegExp, cursor,
-            doNotHighlightHeadings;
+        var sectionEditForm,
+            endPos,
+            stopClassRegExp,
+            doNotHighlightHeadings,
+            cursor;
 
         sectionEditForm = event.target.form;
 
@@ -105,19 +115,20 @@
 
         endPos = getRangeValue(sectionEditForm.range, 'end');
 
+        // set stopClass regexp
         if (endPos === false) {
             return;
-        }
-
-        // set stopClass regexp
-        if (endPos === 'last') {
-            stopClassRegExp = /\bfootnotes\b/;
+        } else if (endPos === 'last') {
+            stopClassRegExp = /\b(?:footnotes)\b/;
         } else if (editIdLookup[endPos + 1]) {
             stopClassRegExp = new RegExp(
                 '\\b(?:footnotes|sectionedit' +
                 String(editIdLookup[endPos + 1]).replace(/(\W)/g, '\\$1') +
                 ')\\b'
             );
+        } else {
+            // edittable plugin etc.
+            return;
         }
 
         doNotHighlightHeadings =
@@ -127,14 +138,18 @@
 
         // highlight until the stopClass appeared
         while (cursor = cursor.nextSibling) {
+            if (!cursor.className) {
+                continue;
+            }
+
             if (stopClassRegExp.test(cursor.className)) {
                 break;
-            } else if (
-                (doNotHighlightHeadings && isHeading(cursor)) ||
-                /\beditbutton_section\b/.test(cursor.className)
+            }
+
+            if (
+                !(doNotHighlightHeadings && isHeading(cursor)) &&
+                !/\b(?:editbutton_section)\b/.test(cursor.className)
             ) {
-                continue;
-            } else {
                 cursor.className += ' section_highlight';
             }
         }
@@ -147,7 +162,13 @@
      * (for DokuWiki Anteater and Rincewind)
      */
     function replaceSectionEditButtonEvents_Anteater() {
-        var i, iMax, parent, events, guid, buttonForms, sectionEditForms = [];
+        var i,
+            iMax,
+            parent,
+            events,
+            guid,
+            buttonForms,
+            sectionEditForms = [];
 
         buttonForms = getElementsByClass('btn_secedit', document, 'form');
 
@@ -158,7 +179,9 @@
             // parent element must be 'div.editbutton_section'
             if (
                 parent &&
-                parent.tagName === 'DIV' &&
+                parent.tagName &&
+                parent.tagName.toLowerCase() === 'div' &&
+                parent.className &&
                 /\b(?:editbutton_section)\b/.test(parent.className)
             ) {
                 sectionEditForms[sectionEditForms.length] = buttonForms[i];
@@ -198,7 +221,11 @@
      * (for DokuWiki Lemming)
      */
     function replaceSectionEditButtonEvents_Lemming() {
-        var i, iMax, events, guid, buttonForms;
+        var i,
+            iMax,
+            events,
+            guid,
+            buttonForms;
 
         buttonForms = getElementsByClass('btn_secedit', document, 'form');
 
@@ -224,7 +251,11 @@
      * (for DokuWiki Lemming or earlier)
      */
     function highlightSections_Lemming(event) {
-        var buttonForm, endPos, cursor, sectionEditForm, startPos;
+        var buttonForm,
+            sectionEditForm,
+            cursor,
+            startPos,
+            endPos;
 
         buttonForm = event.target.form;
 
@@ -237,38 +268,32 @@
 
         cursor = buttonForm.parentNode;
 
-        if (cursor.tagName !== 'DIV') {
+        if (!cursor.tagName || cursor.tagName.toLowerCase() !== 'div') {
             return;
         }
 
         // add "section_highlight" class to DIV elements in the edit range
         while (cursor = cursor.nextSibling) {
-            if (cursor.tagName !== 'DIV' || !cursor.className) {
+            if (
+                !cursor.tagName ||
+                cursor.tagName.toLowerCase() !== 'div' ||
+                !cursor.className
+            ) {
                 continue;
             }
 
-            if (/\bsecedit\b/.test(cursor.className)) {
-                if (endPos === 'last') {
-                    continue;
-                }
-
-                sectionEditForm = cursor.getElementsByTagName('form').item(0);
-
-                if (!sectionEditForm) {
-                    continue;
-                }
-
-                startPos = getRangeValue(sectionEditForm.lines, 'start');
-
-                if (startPos === false) {
-                    continue;
-                }
-
+            if (
+                /\b(?:secedit)\b/.test(cursor.className) &&
+                endPos !== 'last' &&
+                (sectionEditForm = cursor.getElementsByTagName('form').item(0)) &&
+                (startPos = getRangeValue(sectionEditForm.lines, 'start')) !== false &&
+                endPos < startPos
+            ) {
                 // out of the edit range
-                if (endPos < startPos) {
-                    return;
-                }
-            } else if (/\blevel\d\b/.test(cursor.className)) {
+                break;
+            }
+
+            if (/\b(?:level\d)\b/.test(cursor.className)) {
                 cursor.className += ' section_highlight';
             }
         }
