@@ -45,6 +45,12 @@
             .unbind('mouseover')
             .bind('mouseover', function(event) {
                 highlightSections(event);
+            })
+            // FIXME: a huge change has happened... will make a real fix later
+            // https://github.com/splitbrain/dokuwiki/commit/870c8a4b77dd7c2cfdc14045f8604b5bbf34c01e
+            .unbind('mouseout')
+            .bind('mouseout', function(event) {
+                jQuery('.section_highlight').removeClass('section_highlight');
             });
     }
 

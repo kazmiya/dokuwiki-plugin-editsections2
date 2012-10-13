@@ -1,7 +1,7 @@
 base   editsections2
 author Kazutaka Miyasaka
 email  kazmiya@gmail.com
-date   2012-08-08
+date   2012-10-13
 name   EditSections2 Plugin
 desc   Configures section edit features
 url    http://github.com/kazmiya/dokuwiki-plugin-editsections2
