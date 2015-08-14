@@ -5,15 +5,15 @@
  * @author Kazutaka Miyasaka <kazmiya@gmail.com>
  */
 
-html.js body div.dokuwiki div.editbutton_section input.button {
-  margin-top: 2em;
+.secedit button,
+.editbutton_section button {
+  margin-top: 1.5em !important;
 }
 
-body div.dokuwiki div.secedit input.button,
-body div.dokuwiki div.editbutton_section input.button {
-  margin-top: 1.5em;
-}
-
-body div.dokuwiki div.editbutton_table input.button {
+.editbutton_table button {
   margin-top: 0em;
+}
+
+.editbutton_2 {
+display: none;
 }
