@@ -57,7 +57,7 @@ class syntax_plugin_editsections2 extends DokuWiki_Syntax_Plugin
     /**
      * Dummy (only for compatibility reasons)
      */
-    function handle($match, $state, $pos, &$handler)
+    function handle($match, $state, $pos, Doku_Handler $handler)
     {
         // do nothing
     }
@@ -65,7 +65,7 @@ class syntax_plugin_editsections2 extends DokuWiki_Syntax_Plugin
     /**
      * Starts section to put a secedit marker above the first heading
      */
-    function render($format, &$renderer, $data)
+    function render($format, Doku_Renderer $renderer, $data)
     {
         // no need to handle DokuWiki Lemming or earlier
         if (
