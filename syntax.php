@@ -72,7 +72,11 @@ class syntax_plugin_editsections2 extends DokuWiki_Syntax_Plugin
             $format === 'xhtml'
             && function_exists('html_secedit_get_button')
         ) {
-            $renderer->startSectionEdit(-1, 'section', 'dummy');
+            if (defined('SEC_EDIT_PATTERN')) { // for DokuWiki Greebo and more recent versions
+                $renderer->startSectionEdit(-1, array('target' => 'section', 'name' => 'dummy'));
+            } else {
+                $renderer->startSectionEdit(-1, 'section', 'dummy');
+            }
         }
     }
 }
